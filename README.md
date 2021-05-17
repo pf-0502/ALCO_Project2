@@ -1,7 +1,7 @@
 # ALCO_Project2
-2-bit_Histroy_Predictor
+*2-bit_Histroy_Predictor*
 ## 專案說明
-給定一個RISC-V的assembly code，並將所有branch instruction做prediction  
+###給定一個RISC-V的assembly code，並將所有branch instruction做prediction  
 
 Input：一段RISC-V的assembly code，使用者可指定多少個entries  
 
