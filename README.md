@@ -32,6 +32,7 @@ Output：entry、目前做預測的branch instruction、predictor目前state和�
 
 `vector< string > ISA` 去除掉label和address的**instruction** 
 
+***
   ```c++
   void loadTest()
   {
@@ -59,7 +60,7 @@ Output：entry、目前做預測的branch instruction、predictor目前state和�
   }
   ```
   將檔案讀進來並將label特別存起來放到`Label`[包含**key**(label)及**value**(address)]，剩餘的instruction存放至`ISA`內  
-
+***
   ```c++
   void taken(predictor& pred)
   {
@@ -78,7 +79,7 @@ Output：entry、目前做預測的branch instruction、predictor目前state和�
   }
   ```
   根據前兩個branch的結果，去更改目前的狀態  
-
+***
   ```c++
   void printEntries(predictor pred)
   {
@@ -87,7 +88,7 @@ Output：entry、目前做預測的branch instruction、predictor目前state和�
   }
   ```
   輸出該entry之predictor狀態
-  
+***
   ```c++
   if (nextPC != -1) // 真實結果為 taken
   {
@@ -126,8 +127,109 @@ Output：entry、目前做預測的branch instruction、predictor目前state和�
 
       notTaken(pred[i % entry]);
   }
-
   ```
+  顯示該branch instruction的entry預測情形，以及累積的misprediction次數
+***
+```c++
+if (operation == "beq" || operation == "bne" || operation == "blt" ||
+    operation == "bge" || operation == "bltu" || operation == "bgeu")
+{
+    nextPC = type_SB(operation, data, code);
+    ...(顯示該branch instruction的entry預測情形，以及累積的misprediction次數)
+}
+
+else if (operation == "li")
+{
+    ...(切割instruction字串)
+
+    Reg[code.rd] = code.imm12;
+}
+
+else if (operation == "addi" || operation == "slti" || operation == "sltiu" ||
+    operation == "xori" || operation == "ori" || operation == "andi" ||
+    operation == "slli" || operation == "srli" || operation == "srai")
+    type_I(operation, data, code);
+
+else if (operation == "add" || operation == "sub" || operation == "sll" || operation == "slt" ||
+    operation == "sltu" || operation == "xor" || operation == "srl" || operation == "sra" ||
+    operation == "or" || operation == "and")
+    type_R(operation, data, code);
+```
+給對應的opcode決定其為哪個type
+***
+```c++
+void type_I(string operation, string data, instruction& code)
+{
+    ...(切割instruction字串)
+
+    if (operation == "addi")
+    	Reg[code.rd] = Reg[code.rs1] + code.imm12;
+    else if (operation == "slti")
+    	Reg[code.rd] = (Reg[code.rs1] < code.imm12) ? 1 : 0;
+    else if (operation == "sltiu")
+    	Reg[code.rd] = (unsigned(Reg[code.rs1]) < unsigned(code.imm12)) ? 1 : 0;
+    else if (operation == "xori")
+    	Reg[code.rd] = Reg[code.rs1] ^ code.imm12;
+    else if (operation == "ori")
+    	Reg[code.rd] = Reg[code.rs1] | code.imm12;
+    else if (operation == "andi")
+    	Reg[code.rd] = Reg[code.rs1] & code.imm12;
+    else if (operation == "slli")
+    	Reg[code.rd] = Reg[code.rs1] << code.imm12;
+    else if (operation == "srli")
+    	Reg[code.rd] = Reg[code.rs1] >> code.imm12;
+}
+```
+```c++
+void type_R(string operation, string data, instruction& code)
+{
+    ...(切割instruction字串)
+
+    if (operation == "add")
+	Reg[code.rd] = Reg[code.rs1] + Reg[code.rs2];
+    else if (operation == "sub")
+	Reg[code.rd] = Reg[code.rs1] - Reg[code.rs2];
+    else if (operation == "sll")
+	Reg[code.rd] = Reg[code.rs1] << Reg[code.rs2];
+    else if (operation == "slt")
+	Reg[code.rd] = (Reg[code.rs1] < Reg[code.rs2]) ? 1 : 0;
+    else if (operation == "sltu")
+	Reg[code.rd] = (unsigned(Reg[code.rs1]) < unsigned(Reg[code.rs2])) ? 1 : 0;
+    else if (operation == "xor")
+	Reg[code.rd] = Reg[code.rs1] ^ Reg[code.rs2];
+    else if (operation == "srl")
+	Reg[code.rd] = Reg[code.rs1] >> Reg[code.rs2];
+    else if (operation == "or")
+	Reg[code.rd] = Reg[code.rs1] | Reg[code.rs2];
+    else if (operation == "and")
+	Reg[code.rd] = Reg[code.rs1] & Reg[code.rs2];
+}
+```
+```c++
+int type_SB(string operation, string data, instruction& code)
+{
+    ...(切割instruction字串)
+
+    map< string, int >::iterator it = Label.find(temp3);
+
+    if (operation == "beq" && Reg[code.rs1] == Reg[code.rs2])
+	return it->second;
+    else if (operation == "bne" && Reg[code.rs1] != Reg[code.rs2])
+	return it->second;
+    else if (operation == "blt" && Reg[code.rs1] < Reg[code.rs2])
+	return it->second;
+    else if (operation == "bge" && Reg[code.rs1] >= Reg[code.rs2])
+	return it->second;
+    else if (operation == "bltu" && unsigned(Reg[code.rs1]) < unsigned(Reg[code.rs2]))
+	return it->second;
+    else if (operation == "bgeu" && unsigned(Reg[code.rs1]) >= unsigned(Reg[code.rs2]))
+	return it->second;
+    else
+	return -1;
+}
+```
+根據該instruction的指令給予正確的運算或指示
+
 ## Sample Input
     0x110		li R2,0			; v=0 //addi R2,R0,0
     0x114		li R3,16		; Loop bound for LoopI //addi R3,R0,16
