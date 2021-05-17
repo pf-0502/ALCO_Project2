@@ -20,8 +20,9 @@ Output：entry、目前做預測的branch instruction、predictor目前state和�
 6.直到RISC-V code執行結束  
 
 ## 程式碼解釋
-`struct instruction`包含**rd**、**rs1**、**rs2**和**immediate**  
-`struct predictor`包含**目前狀態**、**四個狀態**和**misprediction**  
+`struct instruction` 包含 **rd** 、 **rs1** 、 **rs2** 和 **immediate**  
+
+`struct predictor` 包含 **目前狀態** 、 **四個狀態** 和 **misprediction**  
 ## Sample Input
     0x110		li R2,0			; v=0 //addi R2,R0,0
     0x114		li R3,16		; Loop bound for LoopI //addi R3,R0,16
