@@ -7,22 +7,31 @@ Input：一段RISC-V的assembly code，使用者可指定多少個entries
 
 Output：entry、目前做預測的branch instruction、predictor目前state和所有狀態、預測結果、實際結果、misprediction累積次數，以及列出所有entry之狀態  
 ## 程式流程
-1.讀RISC-V assembly code(.txt檔)進來  
+1. 讀RISC-V assembly code(.txt檔)進來  
 
-2.實際執行RISC-V code的程式  
+2. 實際執行RISC-V code的程式  
 
-3.每遇到branch instruction就做prediction  
+3. 每遇到branch instruction就做prediction  
 
-4.根據每次的預測結果去修改該entry之predictor的狀態  
+4. 根據每次的預測結果去修改該entry之predictor的狀態  
 
-5.每預測一次就輸出一次，並show出所有entry之狀態  
+5. 每預測一次就輸出一次，並show出所有entry之狀態  
 
-6.直到RISC-V code執行結束  
+6. 直到RISC-V code執行結束  
 
 ## 程式碼解釋
 `struct instruction` 包含 **rd** 、 **rs1** 、 **rs2** 和 **immediate**  
 
 `struct predictor` 包含 **目前狀態** 、 **四個狀態** 和 **misprediction**  
+
+`int Reg[32] = {}` 給定register數量並將裡面的值設成**0**  
+
+`string State[4] = { "SN","WN","WT","ST" }` 設定**4種狀態**
+
+`map< string, int > Label` 紀錄**label位置**  
+
+`vector< string > ISA` 去除掉label和address的**instruction**  
+
 ## Sample Input
     0x110		li R2,0			; v=0 //addi R2,R0,0
     0x114		li R3,16		; Loop bound for LoopI //addi R3,R0,16
