@@ -1,11 +1,11 @@
 # ALCO_Project2
 *2-bit_Histroy_Predictor*
 ## 專案說明
-### 給定一個RISC-V的assembly code，並將所有branch instruction做prediction  
+#### 給定一個RISC-V的assembly code，並將所有branch instruction做prediction  
 
-Input：一段RISC-V的assembly code，使用者可指定多少個entries  
+*Input*：一段RISC-V的assembly code，使用者可指定多少個entries  
 
-Output：entry、目前做預測的branch instruction、predictor目前state和所有狀態、預測結果、實際結果、misprediction累積次數，以及列出所有entry之狀態  
+*Output*：entry、目前做預測的branch instruction、predictor目前state和所有狀態、預測結果、實際結果、misprediction累積次數，以及列出所有entry之狀態  
 ## 程式流程
 1. 讀RISC-V assembly code(.txt檔)進來  
 
