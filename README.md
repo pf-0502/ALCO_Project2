@@ -18,11 +18,15 @@ Output：entry、目前做預測的branch instruction、predictor目前state和�
 5.每預測一次就輸出一次，並show出所有entry之狀態  
 
 6.直到RISC-V code執行結束  
+
+## 程式碼解釋
+`struct instruction`包含**rd**、**rs1**、**rs2**和**immediate**  
+`struct predictor`包含**目前狀態**、**四個狀態**和**misprediction**  
 ## Sample Input
-    0x110		li R2,0			; v=0 //addi R2,R0,0  
-    0x114		li R3,16		; Loop bound for LoopI //addi R3,R0,16  
-    0x118		li R4,0			; i=0 //addi R4,R0,0  
-            LoopI:  
+    0x110		li R2,0			; v=0 //addi R2,R0,0
+    0x114		li R3,16		; Loop bound for LoopI //addi R3,R0,16
+    0x118		li R4,0			; i=0 //addi R4,R0,0
+            LoopI:
     0x11C		beq R4,R3,EndLoopI	; Exit LoopI if i==16  
     0x120		li R5,0			; j=0 //addi R5,R0,0  
             LoopJ:  
