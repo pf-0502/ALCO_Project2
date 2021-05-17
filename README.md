@@ -30,32 +30,104 @@ Output：entry、目前做預測的branch instruction、predictor目前state和�
 
 `map< string, int > Label` 紀錄**label位置**  
 
-`vector< string > ISA` 去除掉label和address的**instruction**  
+`vector< string > ISA` 去除掉label和address的**instruction** 
 
-    void loadTest()
-    {
-        fstream test("test.txt", ios::in);
-        for (int i = 0; test.peek() != EOF; i++)
-        {
-            string input, label, nonAddr;
-            stringstream ss, su;
-            getline(test, input);
-            ss << input;
-            ss >> label;
-            if (label[label.size() - 1] == ':')
-            {
-                label.pop_back();
-                Label.insert(pair<string, int>(label, i--));
-            }
-            else if (label[0] == '0') // 若有0x...的東西時
-            {
-                getline(ss, nonAddr, ';'); // 讀到換行或';'(註解)
-                ISA.push_back(nonAddr);
-            }
-            else
-                ISA.push_back(input);
-        }
-    }
+  ```c++
+  void loadTest()
+  {
+      fstream test("test.txt", ios::in);
+      for (int i = 0; test.peek() != EOF; i++)
+      {
+          string input, label, nonAddr;
+          stringstream ss, su;
+          getline(test, input);
+          ss << input;
+          ss >> label;
+          if (label[label.size() - 1] == ':')
+          {
+              label.pop_back();
+              Label.insert(pair<string, int>(label, i--));
+          }
+          else if (label[0] == '0') // 若有0x...的東西時
+          {
+              getline(ss, nonAddr, ';'); // 讀到換行或';'(註解)
+              ISA.push_back(nonAddr);
+          }
+          else
+              ISA.push_back(input);
+          }
+  }
+  ```
+  將檔案讀進來並將label特別存起來放到`Label`[包含**key**(label)及**value**(address)]，剩餘的instruction存放至`ISA`內  
+
+  ```c++
+  void taken(predictor& pred)
+  {
+	  if (pred.state[pred.currentState] < 3)
+		  pred.state[pred.currentState]++;
+	  if (pred.currentState < 3)
+		  pred.currentState = (pred.currentState << 1) % 4 + 1; // 改成前一個branch結果跟目前branch結果
+  }
+
+  void notTaken(predictor& pred)
+  {
+      if (pred.state[pred.currentState] > 0)
+          pred.state[pred.currentState]--;
+      if (pred.currentState > 0)
+          pred.currentState = (pred.currentState << 1) % 4; // 改成前一個branch結果跟目前branch結果
+  }
+  ```
+  根據前兩個branch的結果，去更改目前的狀態  
+
+  ```c++
+  void printEntries(predictor pred)
+  {
+	  cout << "(" << bitset<2>(pred.currentState) << ", " << State[pred.state[0]] << ", " << State[pred.state[1]] << ", " 
+      << State[pred.state[2]] << ", " << State[pred.state[3]] << ") ";
+  }
+  ```
+  輸出該entry之predictor狀態
+  
+  ```c++
+  if (nextPC != -1) // 真實結果為 taken
+  {
+	  if (pred[i % entry].state[pred[i % entry].currentState] < 2) // history predictor所預測的結果(not taken)
+	  {
+		  pred[i % entry].miss++; // misprediction
+		  cout << "entry: " << i % entry << ISA[i] << endl; // 顯示目前使用的entry
+		  printEntries(pred[i % entry]); // 顯示目前predictor狀態
+		  cout << "N" << " T" << setw(18) << "misprediction: " << pred[i % entry].miss << endl; //顯示預測錯誤的累積次數
+	  }
+	  else // history predictor所預測的結果(taken)
+	  {
+		  cout << "entry: " << i % entry << ISA[i] << endl; // 顯示目前使用的entry
+		  printEntries(pred[i % entry]); // 顯示目前predictor狀態
+		  cout << "T" << " T" << setw(18) << "misprediction: " << pred[i % entry].miss << endl; //顯示預測錯誤的累積次數
+	  }
+
+	  taken(pred[i % entry]); // 改該branch的predictor
+	  i = nextPC - 1;
+  }
+  else // 真實結果為 not taken
+  {
+      if (pred[i % entry].state[pred[i % entry].currentState] < 2) // history predictor所預測的結果(not taken)
+      {
+          cout << "entry: " << i % entry << ISA[i] << endl; // 顯示目前使用的entry
+          printEntries(pred[i % entry]); // 顯示目前predictor狀態
+          cout << "N" << " N" << setw(18) << "misprediction: " << pred[i % entry].miss << endl; //顯示預測錯誤的累積次數
+      }
+      else // history predictor所預測的結果(taken)
+      {
+          pred[i % entry].miss++; // misprediction
+          cout << "entry: " << i % entry << ISA[i] << endl; // 顯示目前使用的entry
+          printEntries(pred[i % entry]); // 顯示目前predictor狀態
+          cout << "T" << " N" << setw(18) << "misprediction: " << pred[i % entry].miss << endl; //顯示預測錯誤的累積次數
+      }
+
+      notTaken(pred[i % entry]);
+  }
+
+  ```
 ## Sample Input
     0x110		li R2,0			; v=0 //addi R2,R0,0
     0x114		li R3,16		; Loop bound for LoopI //addi R3,R0,16
