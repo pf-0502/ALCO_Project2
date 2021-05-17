@@ -32,6 +32,30 @@ Output：entry、目前做預測的branch instruction、predictor目前state和�
 
 `vector< string > ISA` 去除掉label和address的**instruction**  
 
+    void loadTest()
+    {
+        fstream test("test.txt", ios::in);
+        for (int i = 0; test.peek() != EOF; i++)
+        {
+            string input, label, nonAddr;
+            stringstream ss, su;
+            getline(test, input);
+            ss << input;
+            ss >> label;
+            if (label[label.size() - 1] == ':')
+            {
+                label.pop_back();
+                Label.insert(pair<string, int>(label, i--));
+            }
+            else if (label[0] == '0') // 若有0x...的東西時
+            {
+                getline(ss, nonAddr, ';'); // 讀到換行或';'(註解)
+                ISA.push_back(nonAddr);
+            }
+            else
+                ISA.push_back(input);
+        }
+    }
 ## Sample Input
     0x110		li R2,0			; v=0 //addi R2,R0,0
     0x114		li R3,16		; Loop bound for LoopI //addi R3,R0,16
