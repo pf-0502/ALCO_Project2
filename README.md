@@ -78,7 +78,7 @@
           pred.currentState = (pred.currentState << 1) % 4; // 改成前一個branch結果跟目前branch結果
   }
   ```
-  根據前兩個branch的結果，去更改目前的狀態  
+  根據前兩個predictor的結果，去更改目前的狀態  
 ***
   ```c++
   void printEntries(predictor pred)
@@ -128,7 +128,7 @@
       notTaken(pred[i % entry]);
   }
   ```
-  顯示該branch instruction的entry預測情形，以及累積的misprediction次數
+  顯示該instruction的entry預測情形，以及累積的misprediction次數
 ***
 ```c++
 if (operation == "beq" || operation == "bne" || operation == "blt" ||
@@ -138,12 +138,12 @@ if (operation == "beq" || operation == "bne" || operation == "blt" ||
 else if (operation == "addi" || operation == "slti" || operation == "sltiu" ||
     operation == "xori" || operation == "ori" || operation == "andi" ||
     operation == "slli" || operation == "srli" || operation == "srai")
-    type_I(operation, data, code);
+    nextPC = type_I(operation, data, code);
 
 else if (operation == "add" || operation == "sub" || operation == "sll" || operation == "slt" ||
     operation == "sltu" || operation == "xor" || operation == "srl" || operation == "sra" ||
     operation == "or" || operation == "and")
-    type_R(operation, data, code);
+    nextPC = type_R(operation, data, code);
     
 else if (operation == "li")
 {
@@ -233,7 +233,7 @@ int type_SB(string operation, string data, instruction& code)
 	return -1;
 }
 ```
-根據該instruction的指令給予正確的運算或指示
+根據該instruction的指令給予正確的運算或指示，並return回傳值(**-1**為**not taken**)
 
 ## Sample Input
     0x110		li R2,0			; v=0 //addi R2,R0,0
