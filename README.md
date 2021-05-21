@@ -1,17 +1,17 @@
 # ALCO_Project2
 *2-bit_Histroy_Predictor*
 ## 專案說明
-#### 給定一個RISC-V的assembly code，並將所有branch instruction做prediction  
+#### 給定一個RISC-V的assembly code，並將所有instruction做prediction  
 
 *Input*：一段RISC-V的assembly code，使用者可指定多少個entries  
 
-*Output*：entry、目前做預測的branch instruction、predictor目前state和所有狀態、預測結果、實際結果、misprediction累積次數，以及列出所有entry之狀態  
+*Output*：entry、目前做預測的instruction、predictor目前state和所有狀態、預測結果、實際結果、misprediction累積次數，以及列出所有entry之狀態  
 ## 程式流程
 1. 讀RISC-V assembly code(.txt檔)進來  
 
 2. 實際執行RISC-V code的程式  
 
-3. 每遇到branch instruction就做prediction  
+3. 對每個instruction做prediction  
 
 4. 根據每次的預測結果去修改該entry之predictor的狀態  
 
@@ -133,18 +133,8 @@
 ```c++
 if (operation == "beq" || operation == "bne" || operation == "blt" ||
     operation == "bge" || operation == "bltu" || operation == "bgeu")
-{
     nextPC = type_SB(operation, data, code);
-    ...(顯示該branch instruction的entry預測情形，以及累積的misprediction次數)
-}
-
-else if (operation == "li")
-{
-    ...(切割instruction字串)
-
-    Reg[code.rd] = code.imm12;
-}
-
+    
 else if (operation == "addi" || operation == "slti" || operation == "sltiu" ||
     operation == "xori" || operation == "ori" || operation == "andi" ||
     operation == "slli" || operation == "srli" || operation == "srai")
@@ -154,11 +144,22 @@ else if (operation == "add" || operation == "sub" || operation == "sll" || opera
     operation == "sltu" || operation == "xor" || operation == "srl" || operation == "sra" ||
     operation == "or" || operation == "and")
     type_R(operation, data, code);
+    
+else if (operation == "li")
+{
+    ...(切割instruction字串)
+
+    Reg[code.rd] = code.imm12;
+    
+    nextPC = -1;
+}
+
+...(顯示該branch instruction的entry預測情形，以及累積的misprediction次數)
 ```
 給對應的opcode決定其為哪個type
 ***
 ```c++
-void type_I(string operation, string data, instruction& code)
+int type_I(string operation, string data, instruction& code)
 {
     ...(切割instruction字串)
 
@@ -178,10 +179,12 @@ void type_I(string operation, string data, instruction& code)
     	Reg[code.rd] = Reg[code.rs1] << code.imm12;
     else if (operation == "srli")
     	Reg[code.rd] = Reg[code.rs1] >> code.imm12;
+	
+    return -1;
 }
 ```
 ```c++
-void type_R(string operation, string data, instruction& code)
+int type_R(string operation, string data, instruction& code)
 {
     ...(切割instruction字串)
 
@@ -203,6 +206,8 @@ void type_R(string operation, string data, instruction& code)
 	Reg[code.rd] = Reg[code.rs1] | Reg[code.rs2];
     else if (operation == "and")
 	Reg[code.rd] = Reg[code.rs1] & Reg[code.rs2];
+	
+    return -1;
 }
 ```
 ```c++
