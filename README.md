@@ -233,7 +233,7 @@ int type_SB(string operation, string data, instruction& code)
 	return -1;
 }
 ```
-根據該instruction的指令給予正確的運算或指示，並return回傳值(**-1**為**not taken**)
+根據該instruction的指令給予正確的運算或指示，並return回傳值( **-1** 為 **not taken** )
 
 ## Sample Input
     0x110		li R2,0			; v=0 //addi R2,R0,0
@@ -257,6 +257,7 @@ int type_SB(string operation, string data, instruction& code)
             EndLoopI:  
 ## Sample Output
 	Please input entry(entry > 0):
+	10
 	entry: 0		li R2,0			
 	(00, SN, SN, SN, SN) N N   misprediction: 0
 	all entries: 
